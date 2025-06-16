@@ -1,0 +1,34 @@
+<project
+	basedir="."
+	xmlns:au="antlib:org.apache.ant.antunit"
+	xmlns:xproc="http://xspec.io/ns/xproc"
+	name="test-xproc-3-1-report-html">
+	
+	<target name="suiteSetUp">
+		<delete dir="${xspec.test-runner.dir}/${ant.project.name}" />	
+	</target>
+	
+	<target name="setUp" />
+	
+	<target name="tearDown" />		
+		
+	<target name="test-result-is-created">		
+			
+		<local name="local.test-outputs.result" />
+		<property name="local.test-outputs.result" location="${xspec.test-runner.tmp-dir}/${ant.project.name}/result-is-created/result.html" />
+		
+		<local name="local.test-outputs.result-dir" />	
+		<dirname property="local.test-outputs.result-dir" file="${local.test-outputs.result}" />
+		<mkdir dir="${local.test-outputs.result-dir}" />
+							
+		<xproc:report-html
+			source="${xspec.home}/test/xproc/data/control/identity-transform/identity-result.xml"
+			result="${local.test-outputs.result}" 
+			debug="false"
+		/>
+				
+		<au:assertFileExists file="${local.test-outputs.result}" message="A file should have been created containing whatever was returned via the result port." />		
+		
+	</target>	
+	
+</project>

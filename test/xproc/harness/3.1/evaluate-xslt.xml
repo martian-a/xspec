@@ -1,0 +1,47 @@
+<project
+	basedir="."
+	xmlns:au="antlib:org.apache.ant.antunit"
+	xmlns:xproc="http://xspec.io/ns/xproc"
+	name="test-xproc-3-1-evaluate-xslt">	
+	
+	<target name="suiteSetUp">
+		<delete dir="${xspec.test-runner.tmp-dir}/${ant.project.name}" />	
+		
+		
+		<local name="local.test-inputs.compiled" />
+		<property name="local.test-inputs.compiled" location="${xspec.test-runner.tmp-dir}/${ant.project.name}/compiled.xsl" />
+		
+		<mkdir dir="${xspec.test-runner.tmp-dir}/${ant.project.name}" />
+		
+		<xproc:compile-xslt
+			source="${xspec.home}/test/xproc/data/input/identity-transform/identity.xspec"
+			result="${local.test-inputs.compiled}" 
+			debug="false"
+		/>
+		
+	</target>
+	
+	<target name="setUp" />	
+	
+	<target name="tearDown" />		
+		
+	<target name="test-result-is-created">
+			
+		<local name="local.test-outputs.result" />
+		<property name="local.test-outputs.result" location="${xspec.test-runner.tmp-dir}/${ant.project.name}/result-is-created/result.xml" />
+		
+		<local name="local.test-outputs.result-dir" />	
+		<dirname property="local.test-outputs.result-dir" file="${local.test-outputs.result}" />
+		<mkdir dir="${local.test-outputs.result-dir}" />
+				
+		<xproc:evaluate-xslt
+			source="${xspec.test-runner.tmp-dir}/${ant.project.name}/compiled.xsl"
+			result="${local.test-outputs.result}" 
+			debug="false"
+		/>
+				
+		<au:assertFileExists file="${local.test-outputs.result}" message="A file should have been created containing whatever was returned via the result port." />		
+		
+	</target>	
+	
+</project>

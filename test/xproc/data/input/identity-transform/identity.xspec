@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:description xmlns:x="http://www.jenitennison.com/xslt/xspec" 
+	stylesheet="identity.xsl">
+	
+	<x:scenario label="Identity transform">
+		
+		<x:context><example version="1.0"><p>Hello World!</p></example></x:context>
+		
+		<x:expect label="Exact copy"><example version="1.0"><p>Hello World!</p></example></x:expect>
+		
+	</x:scenario>
+	
+</x:description>

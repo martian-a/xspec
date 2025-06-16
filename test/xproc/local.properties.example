@@ -1,0 +1,18 @@
+xspec.debug=false
+
+# XSpec
+xspec.home=/home/hharrington/repositories/xspec
+
+# Test directories
+xspec.test.home=${xspec.home}/test
+xspec.test.xproc.data.input=${xspec.test.home}/xproc/data/input
+xspec.test.xproc.data.control=${xspec.test.home}/xproc/data/control
+
+# Jar files
+xspec.lib.ant-contrib.jar=/home/hharrington/tools/ant-contrib/1.0b3/ant-contrib-1.0b3.jar
+xspec.lib.ant-unit.jar=/home/hharrington/tools/apache/ant/antunit/1.4.1/ant-antunit-1.4.1.jar
+xspec.lib.xproc-processor.jar=/home/hharrington/tools/morgana-xproc/IIIse-1.6.10/MorganaXProc-IIIse.jar
+xspec.lib.xproc-processor.lib=/home/hharrington/tools/morgana-xproc/IIIse-1.6.10/MorganaXProc-IIIse_lib/*
+xspec.lib.xproc-processor.config=/home/hharrington/tools/morgana-xproc/IIIse-1.6.10/config.xml
+xspec.lib.xslt-processor.jar=/home/hharrington/tools/morgana-xproc/IIIse-1.6.10/MorganaXProc-IIIse_lib/saxon-he-10.9.jar
+xspec.lib.catalog-resolver.jar=/home/hharrington/tools/apache/xml-commons-resolver/1.2/resolver.jar

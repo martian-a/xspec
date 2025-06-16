@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<antlib
+    xmlns:if="ant:if"
+    xmlns:unless="ant:unless"
+    xmlns:local="http://xspec.io/ns/xproc">
+	
+	<macrodef
+		name="run-for-xslt"
+		description="Compile, evaluate and report on an XSpec test file for an XSLT stylesheet."> 
+		
+		<attribute name="source" />
+		<attribute name="result" />
+		<attribute name="xproc-processor" default="${xspec.lib.xproc-processor.jar}" />
+		<attribute name="xproc-processor-config" default="${xspec.lib.xproc-processor.config}" />
+		<attribute name="xproc-processor-lib" default="${xspec.lib.xproc-processor.lib}" />
+		<attribute name="xslt-processor" default="${xspec.lib.xslt-processor.jar}" />
+		<attribute name="catalog-resolver" default="${xspec.lib.catalog-resolver.jar}" />
+		<attribute name="debug" default="false" />
+		
+		<sequential>
+			
+			<local name="local.test-outputs.compile.result" />
+			<property name="local.test-outputs.compile.result" location="${xspec.test-runner.tmp-dir}/run-for-xslt/compiled.xsl" />
+						
+			<local:compile-xslt
+				source="@{source}"
+				result="${local.test-outputs.compile.result}" 
+				xproc-processor="@{xproc-processor}"
+				xproc-processor-config="@{xproc-processor-config}"
+				xproc-processor-lib="@{xproc-processor-lib}"
+				xslt-processor="@{xslt-processor}"
+				catalog-resolver="@{catalog-resolver}"
+				debug="@{debug}"
+			/>
+			
+			<local name="local.test-outputs.evaluate.result" />
+			<property name="local.test-outputs.evaluate.result" location="${xspec.test-runner.tmp-dir}/run-for-xslt/results.xml" />
+			
+			<local:evaluate-xslt
+				source="${local.test-outputs.compile.result}"
+				result="${local.test-outputs.evaluate.result}" 
+				xproc-processor="@{xproc-processor}"
+				xproc-processor-config="@{xproc-processor-config}"
+				xproc-processor-lib="@{xproc-processor-lib}"
+				xslt-processor="@{xslt-processor}"
+				catalog-resolver="@{catalog-resolver}"
+				debug="@{debug}"
+			/>
+			
+			<local:report-html
+				source="${local.test-outputs.evaluate.result}"
+				result="@{result}" 
+				xproc-processor="@{xproc-processor}"
+				xproc-processor-config="@{xproc-processor-config}"
+				xproc-processor-lib="@{xproc-processor-lib}"
+				xslt-processor="@{xslt-processor}"
+				catalog-resolver="@{catalog-resolver}"
+				debug="@{debug}"
+			/>
+			
+		</sequential>
+		
+	</macrodef>
+    
+    
+    <macrodef
+        name="compile-xslt"
+        description="Use XProc to compile an XSpec test file for XSLT."> 
+        
+        <attribute name="source" />
+        <attribute name="result" />
+    	<attribute name="xproc-processor" default="${xspec.lib.xproc-processor.jar}" />
+    	<attribute name="xproc-processor-config" default="${xspec.lib.xproc-processor.config}" />
+    	<attribute name="xproc-processor-lib" default="${xspec.lib.xproc-processor.lib}" />
+    	<attribute name="xslt-processor" default="${xspec.lib.xslt-processor.jar}" />
+    	<attribute name="catalog-resolver" default="${xspec.lib.catalog-resolver.jar}" />
+        <attribute name="debug" default="false" />
+        
+        <sequential>                                  
+                                
+        	<local name="local.uri.result" />
+            <local name="local.uri.debug-dir" />
+            
+        	<makeurl property="local.uri.result" file="@{result}" validate="false" />
+            <makeurl property="local.uri.debug-dir" file="@{debug-dir}" validate="false" />
+        	
+            
+        	<java classname="com.xml_project.morganaxproc3.XProcEngine" failonerror="true">					
+        		<classpath>
+        			<pathelement location="${java.class.path}" />
+        			<pathelement location="@{xslt-processor}" />      
+        			<pathelement location="@{xproc-processor-lib}/*" />
+        			<pathelement location="@{xproc-processor}" />        			        		
+        		</classpath>
+        		
+        		<arg value="-config=@{xproc-processor-config}" />		
+        		
+        		<!-- Pipeline -->
+        		<arg value="${xspec.home}/src/harnesses/xproc-3.1/compile-xslt.xpl" />     
+        		        		        		
+        		<arg value="-input:source=@{source}" />	        	
+        		
+        		<arg value="-output:result=${local.uri.result}" />
+        									
+        		<arg value="-option:debug=@{debug}" />    
+			</java>	                     
+            
+        </sequential>		
+    </macrodef>	
+	
+	
+	<macrodef
+		name="evaluate-xslt"
+		description="Use XProc to evaluate an XSpec test file compiled into an XSLT stylesheet."> 
+		
+		<attribute name="source" />
+		<attribute name="result" />
+		<attribute name="xproc-processor" default="${xspec.lib.xproc-processor.jar}" />
+		<attribute name="xproc-processor-config" default="${xspec.lib.xproc-processor.config}" />
+		<attribute name="xproc-processor-lib" default="${xspec.lib.xproc-processor.lib}" />
+		<attribute name="xslt-processor" default="${xspec.lib.xslt-processor.jar}" />
+		<attribute name="catalog-resolver" default="${xspec.lib.catalog-resolver.jar}" />
+		<attribute name="debug" default="false" />
+		
+		<sequential>                                  
+			
+			<local name="local.uri.result" />
+			<local name="local.uri.debug-dir" />
+			
+			<makeurl property="local.uri.result" file="@{result}" validate="false" />
+			<makeurl property="local.uri.debug-dir" file="@{debug-dir}" validate="false" />
+			
+			<java classname="com.xml_project.morganaxproc3.XProcEngine" failonerror="true">					
+				<classpath>
+					<pathelement location="${java.class.path}" />
+					<pathelement location="@{xslt-processor}" />      
+					<pathelement location="@{xproc-processor-lib}/*" />
+					<pathelement location="@{xproc-processor}" />        			        		
+				</classpath>
+				
+				<arg value="-config=@{xproc-processor-config}" />			
+				
+				<!-- Pipeline -->
+				<arg value="${xspec.home}/src/harnesses/xproc-3.1/evaluate-xslt.xpl" />     
+				
+				<arg value="-input:source=@{source}" />	        	
+				
+				<arg value="-output:result=${local.uri.result}" />
+				  
+				<arg value="-option:debug=@{debug}" />    
+			</java>	                     
+			
+		</sequential>		
+	</macrodef>	
+	
+	
+	<macrodef
+		name="report-html"
+		description="Use XProc to create an HTML view of the test results."> 
+		
+		<attribute name="source" />
+		<attribute name="result" />
+		<attribute name="xproc-processor" default="${xspec.lib.xproc-processor.jar}" />
+		<attribute name="xproc-processor-config" default="${xspec.lib.xproc-processor.config}" />
+		<attribute name="xproc-processor-lib" default="${xspec.lib.xproc-processor.lib}" />
+		<attribute name="xslt-processor" default="${xspec.lib.xslt-processor.jar}" />
+		<attribute name="catalog-resolver" default="${xspec.lib.catalog-resolver.jar}" />
+		<attribute name="debug" default="false" />
+		
+		<sequential>                                  
+			
+			<local name="local.uri.result" />
+			<local name="local.uri.debug-dir" />
+			
+			<makeurl property="local.uri.result" file="@{result}" validate="false" />
+			<makeurl property="local.uri.debug-dir" file="@{debug-dir}" validate="false" />
+			
+			<java classname="com.xml_project.morganaxproc3.XProcEngine" failonerror="true">					
+				<classpath>
+					<pathelement location="${java.class.path}" />
+					<pathelement location="@{xslt-processor}" />      
+					<pathelement location="@{xproc-processor-lib}/*" />
+					<pathelement location="@{xproc-processor}" />        			        		
+				</classpath>
+				
+				<arg value="-config=@{xproc-processor-config}" />			
+				
+				<!-- Pipeline -->
+				<arg value="${xspec.home}/src/harnesses/xproc-3.1/report-html.xpl" />     
+				
+				<arg value="-input:source=@{source}" />	        	
+				
+				<arg value="-output:result=${local.uri.result}" />
+				    
+				<arg value="-option:debug=@{debug}" />    
+			</java>	                     
+			
+		</sequential>		
+	</macrodef>	
+    
+</antlib>

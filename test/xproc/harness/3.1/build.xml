@@ -1,0 +1,66 @@
+<project
+	basedir="."
+	xmlns:au="antlib:org.apache.ant.antunit"
+	xmlns:xproc="http://xspec.io/ns/xproc"
+	name="test-xproc-3-1-harness"
+	default="test">
+	
+		
+	<dirname property="xspec.test-runner.dir" file="${ant.file}" />
+	
+	<!-- Load properties specific to a user or environment (optional) -->	
+	<property file="${xspec.test-runner.dir}/../../local.properties" />		
+	
+	<property name="xspec.test-runner.tmp-dir" location="${xspec.test-runner.dir}/tmp" />
+	
+	<propertyset id="xspec-properties">
+		<propertyref prefix="xspec." />
+	</propertyset>		
+
+	
+	<!-- Import ant-unit and ant-contrib macro-defs -->
+	<taskdef resource="org/apache/ant/antunit/antlib.xml" uri="antlib:org.apache.ant.antunit">
+		<classpath>
+			<pathelement location="${xspec.lib.ant-unit.jar}" />
+		</classpath>
+	</taskdef>
+	
+	<taskdef resource="net/sf/antcontrib/antlib.xml">
+		<classpath>
+			<pathelement location="${xspec.lib.ant-contrib.jar}" />
+		</classpath>
+	</taskdef>	
+
+	<taskdef file="${xspec.test-runner.dir}/lib.xml" uri="http://xspec.io/ns/xproc" />
+	
+	<!--
+	<echoproperties prefix="ant" />
+	<echoproperties prefix="xspec" />
+	-->
+	
+	<delete dir="${xspec.test-runner.tmp-dir}" />		
+		
+	<target name="test">
+		
+		<au:antunit>
+			<file file="${xspec.test-runner.dir}/compile-xslt.xml" />
+			<file file="${xspec.test-runner.dir}/evaluate-xslt.xml" />
+			<file file="${xspec.test-runner.dir}/report-html.xml" />
+			<au:plainlistener />
+			<propertyset refid="xspec-properties" />
+		</au:antunit>
+		
+	</target>
+	
+	<target name="run-for-xslt">
+		
+		<mkdir dir="${xspec.test-runner.tmp-dir}/run-for-xslt" />
+		
+		<xproc:run-for-xslt
+			source="${xspec.home}/test/xproc/data/input/identity-transform/identity.xspec"
+			result="${xspec.test-runner.tmp-dir}/run-for-xslt/results.html"
+		/>
+		
+	</target>
+	
+</project>

@@ -8,7 +8,7 @@
 # Eclipse project information
 /.project
 /.settings
-.classpath
+/.classpath
 
 # Node.js
 /node_modules/
@@ -16,3 +16,7 @@
 # https://github.com/xspec/xspec/pull/13#issuecomment-412299372
 # .idea/
 # *.iml
+
+# Ephemeral artefacts
+tmp/
+*.tmp
