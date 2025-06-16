@@ -22,7 +22,7 @@
 		<mkdir dir="${local.test-outputs.result-dir}" />
 							
 		<xproc:report-html
-			source="${xspec.home}/test/xproc/data/control/identity-transform/identity-result.xml"
+			source="${xspec.test-runner.dir}/data/control/identity-transform/identity-result.xml"
 			result="${local.test-outputs.result}" 
 			debug="false"
 		/>

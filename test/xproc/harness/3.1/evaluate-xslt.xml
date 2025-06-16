@@ -14,7 +14,7 @@
 		<mkdir dir="${xspec.test-runner.tmp-dir}/${ant.project.name}" />
 		
 		<xproc:compile-xslt
-			source="${xspec.home}/test/xproc/data/input/identity-transform/identity.xspec"
+			source="${xspec.test-runner.dir}/data/input/identity-transform/identity.xspec"
 			result="${local.test-inputs.compiled}" 
 			debug="false"
 		/>

@@ -22,7 +22,7 @@
 		<mkdir dir="${local.test-outputs.result-dir}" />
 		
 		<xproc:compile-xslt
-			source="${xspec.home}/test/xproc/data/input/identity-transform/identity.xspec"
+			source="${xspec.test-runner.dir}/data/input/identity-transform/identity.xspec"
 			result="${local.test-outputs.result}" 
 			debug="false"
 		/>
