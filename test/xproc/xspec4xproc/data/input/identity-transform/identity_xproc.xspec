@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://www.jenitennison.com/xproc/xspec" type="application/relax-ng-compact-syntax"?>
+<x:description xmlns:x="http://www.jenitennison.com/xproc/xspec" 
+	step="identity.xpl" version="3.1">
+	
+	<x:scenario label="A simple XML sample">
+		
+		<x:context>
+			<x:port name="source"><example version="1.0"><p>Hello World!</p></example></x:port>			
+		</x:context>
+		
+		<x:expect port="result" label="Exact copy"><example version="1.0"><p>Hello World!</p></example></x:expect>
+		
+	</x:scenario>
+	
+</x:description>
