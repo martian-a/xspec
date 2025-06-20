@@ -3,9 +3,9 @@
 	xmlns:c="http://www.w3.org/ns/xproc-step"
 	xmlns:p="http://www.w3.org/ns/xproc"      
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns:x="http://www.jenitennison.com/xslt/xspec"   
+	xmlns:xpc="http://xspec.io/ns/xproc"
 	name="evaluate-xslt"
-	type="x:evaluate-xslt"
+	type="xpc:evaluate-xslt"
 	version="3.1">
 	
 	<!-- Compiled XSpec test file -->
