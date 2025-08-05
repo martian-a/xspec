@@ -18,7 +18,7 @@
 	
 	<p:xslt>
 		<p:with-input port="stylesheet">
-			<p:document href="/home/sheila/Code/repositories/my-xspec-fork/src/compiler/compile-xslt-tests.xsl" />
+			<p:document href="../../compiler/compile-xslt-tests.xsl" />
 		</p:with-input>		
 	</p:xslt>
 	
