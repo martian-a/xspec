@@ -4,8 +4,10 @@
 <!--  Author:     Florent Georges                                          -->
 <!--  Date:       2011-11-08                                               -->
 <!--  Contributors:                                                        -->
-<!--        George Bina - updated to use XProc 3                           -->
-<!--  Date:       2025-06-09                                               -->
+<!--      2025-06-09 George Bina: updated to use XProc 3                   -->
+<!--      2025-09-08 Sheila Thomson: converted parameters to options;      -->
+<!--                     changed x:log to p:store with use-when;           -->
+<!--					 converted commented documentation to markup.      -->
 <!--  URI:        http://github.com/xspec/xspec                            -->
 <!--  Tags:                                                                -->
 <!--    Copyright (c) 2011 Florent Georges (see end of file.)              -->
@@ -13,6 +15,7 @@
 
 
 <p:library xmlns:c="http://www.w3.org/ns/xproc-step"
+	       xmlns:doc="https://www.oxygenxml.com/ns/doc/xsl"
            xmlns:p="http://www.w3.org/ns/xproc"
            xmlns:pkg="http://expath.org/ns/pkg"
            xmlns:x="http://www.jenitennison.com/xslt/xspec"
@@ -22,258 +25,418 @@
            pkg:import-uri="#none"
            exclude-inline-prefixes="map xs xsl x pkg p c"
            version="3.1">
+	
 
-   
-   <!--
-       Pass through and possibly log the input.
-       
-       If there is an option whose name is the $if-set value
-       (e.g., 'log-xml-report'), the option value must be a
-       URI that indicates where to log the input to this step.
+	<p:documentation>
+		<doc:p>Compile the suite on source into a stylesheet on result.</doc:p>
+	</p:documentation>
+	<p:declare-step type="x:compile-xslt" name="compile-xsl" expand-text="true">
+	
+		<p:documentation>
+			<p:doc>The XSpec test file to compile.</p:doc>
+		</p:documentation>
+		<p:input  port="source" primary="true"/>
+		
+		<p:documentation>
+			<p:doc>The compiled XSLT version of the XSpec test file.</p:doc>
+		</p:documentation>
+		<p:output port="result" primary="true"/>
+	
+		<p:documentation>
+			<doc:p>A path to the XSLT stylesheet to use to compile the test file (optional).</doc:p>
+		</p:documentation>
+		<p:option name="compiler-uri" as="xs:anyURI?" static="true" />
+		
+		<p:documentation>
+			<doc:p>Configuration options to pass through to the compiler stylesheet (optional).</doc:p>
+		</p:documentation>
+		<p:option name="compiler-options" as="map(xs:QName, item()*)?" static="true" />
+		
+		<p:documentation>
+			<doc:p>A path to the root of the XSpec project (optional).</doc:p>
+		</p:documentation>
+		<p:option name="xspec-home" as="xs:anyURI?" static="true" />
+		
+		<p:documentation>
+			<doc:p>If you want to store a copy of the compiled XSpec, for example to aid with 
+				debugging, then you can use this option to specify where to save it (optional).  
+				If this option is empty then this step will NOT save a copy of the compiled 
+				XSpec result to the file-system.</doc:p>
+			<doc:p>The compiled XSpec will always be output via the result port.</doc:p>
+		</p:documentation>
+		<p:option name="log-compiled" as="xs:anyURI?" static="true" />
+            
+		<p:group>			
+			<p:documentation>
+				<doc:ol>
+					<doc:li>if compiler-uri is not passed, then use xspec-home to resolve the compiler</doc:li>
+					<doc:li>if xspec-home is not passed, then use the packaging public URI</doc:li>
+				</doc:ol>
+			</p:documentation>
+			<p:variable name="compiler"
+				select="if (normalize-space($compiler-uri) != '') then (
+					$compiler-uri
+				) else if (normalize-space($xspec-home) != '') then (
+					resolve-uri('src/compiler/compile-xslt-tests.xsl', $xspec-home)
+				) else (
+					'http://www.jenitennison.com/xslt/xspec/compile-xslt-tests.xsl'
+				)"
+			/>
+			
+			<p:documentation>
+				<doc:p>Compile the test file into XSLT.</doc:p>
+			</p:documentation>
+			<p:xslt>
+				<p:with-input port="source" pipe="source@compile-xsl"/>
+				<p:with-input port="stylesheet">
+					<p:document href="{$compiler}" pkg:kind="xslt" />
+				</p:with-input>
+				<p:with-option name="parameters" select="$compiler-options"/>
+			</p:xslt>
+		</p:group>
 
-       If there is no such option, no log is produced.
-   -->
-   <p:declare-step type="x:log" name="log">
-      <!-- the port declarations -->
-      <p:input  port="source" primary="true"/>
-      <p:output port="result" primary="true"/>
+		<p:documentation>
+			<p:doc>Store a copy of the compiled test file if a location to store it at has been supplied.</p:doc>
+		</p:documentation>
+		<p:store use-when="normalize-space($log-compiled) != ''" message="[debug] Saving compiled tests to {$log-compiled}">
+			<p:with-option name="href" select="$log-compiled" />         
+		</p:store>
+		
+	</p:declare-step>
+
+
+	<p:documentation>
+		<doc:p>Compile the suite on source into XQuery.</doc:p>
+		<doc:p>Parameters to the XSpec XQuery compiler, AKA compile-xquery-tests.xsl, 
+			can be supplied via the step option named compiler-options (e.g. utils-library-at to suppress 
+			the at location hint to use to import the XSpec utils library modules in the 
+			generated query)</doc:p>
+	</p:documentation>
+	<p:declare-step type="x:compile-xquery" name="compile-xq" expand-text="true">
+   	
+	   	<p:documentation>
+	   		<p:doc>The XSpec test file to compile.</p:doc>
+	   	</p:documentation>
+	   	<p:input  port="source" primary="true"/>
+	   	
+	   	<p:documentation>
+	   		<p:doc>The compiled XQuery version of the XSpec test file.</p:doc>
+	   	</p:documentation>
+	   	<p:output port="result" primary="true"/>
+	   	
+	   	<p:documentation>
+	   		<doc:p>A path to the XSLT stylesheet to use to compile the test file (optional).</doc:p>
+	   	</p:documentation>
+	   	<p:option name="compiler-uri" as="xs:anyURI?" static="true" />
+	   	
+	   	<p:documentation>
+	   		<doc:p>Configuration options to pass through to the compiler stylesheet (optional).</doc:p>
+	   	</p:documentation>
+		<p:option name="compiler-options" select="map{}" as="map(xs:QName, item()*)?" static="true" />
+	   	
+	   	<p:documentation>
+	   		<doc:p>A path to the root of the XSpec project (optional).</doc:p>
+	   	</p:documentation>
+	   	<p:option name="xspec-home" as="xs:anyURI?" static="true" />
+	   	
+		<p:documentation>
+			<doc:p>If you want to store a copy of the compiler, for example to aid with 
+				debugging, then you can use this option to specify where to save it (optional).  
+				If this option is empty then this step will NOT save a copy of the compiler 
+				code to the file-system.</doc:p>
+		</p:documentation>
+		<p:option name="log-compiler" as="xs:anyURI?" static="true" />
+	   	
+	   	<p:documentation>
+	   		<doc:p>If you want to store a copy of the compiled XSpec, for example to aid with 
+	   			debugging, then you can use this option to specify where to save it (optional).  
+	   			If this option is empty then this step will NOT save a copy of the compiled 
+	   			XSpec result to the file-system.</doc:p>
+	   		<doc:p>The compiled XSpec will always be output via the result port.</doc:p>
+	   	</p:documentation>
+	   	<p:option name="log-compiled" as="xs:anyURI?" static="true" />
       
-      <p:option name="parameters" as="map(xs:QName,item()*)?"/>
-      <p:option name="if-set" required="true"/>
-      
-      <p:group>
-         <p:variable name="uri" select="map:get($parameters, xs:QName($if-set))"/>
-         <p:choose>
-            <p:when test="$uri != ''">
-               <p:store message="[x:log] Saving {$if-set} to {$uri}.">
-                  <p:with-option name="href" select="$uri"/>
-               </p:store>
-               <p:identity>
-                  <p:with-input port="source" pipe="source@log"/>
-               </p:identity>
-            </p:when>
-            <p:otherwise>
-               <p:identity/>
-            </p:otherwise>
-         </p:choose>
-      </p:group>
-   </p:declare-step>
+		<p:group>
+      	
+			<p:documentation>
+				<doc:ol>
+					<doc:li>if compiler-uri is not passed, then use xspec-home to resolve the compiler</doc:li>
+					<doc:li>if xspec-home is not passed, then use the packaging public URI</doc:li>
+				</doc:ol>
+			</p:documentation>
+			<p:variable name="compiler" select="if (normalize-space($compiler-uri) != '') then (
+					$compiler-uri
+				) else if (normalize-space($xspec-home) != '') then (
+					resolve-uri('src/compiler/compile-xquery-tests.xsl', $xspec-home)
+				) else (
+					'http://www.jenitennison.com/xslt/xspec/compile-xquery-tests.xsl'
+				)"
+			/>
+			
+			<p:documentation>
+				<doc:p>Set the compiler to be imported into another stylesheet.</doc:p>
+				<doc:p>The wrapper stylesheet will be used as the compiler.</doc:p>
+			</p:documentation>
+			<p:insert match="/*" position="first-child" name="wrap-compiler">
+				<p:with-input port="source" expand-text="false">
+					<p:inline exclude-inline-prefixes="#all">
+						<xsl:stylesheet
+							exclude-result-prefixes="#all"
+							version="3.0">
+							<xsl:template match="document-node()" as="element(Q{http://www.w3.org/ns/xproc-step}query)">
+								<query xmlns="http://www.w3.org/ns/xproc-step"><xsl:next-match /></query>
+							</xsl:template>
+						</xsl:stylesheet>
+					</p:inline>
+				</p:with-input>
+				<p:with-input port="insertion" expand-text="true">
+					<p:inline exclude-inline-prefixes="#all">
+						<xsl:import href="{$compiler}" />
+					</p:inline>
+				</p:with-input>
+			</p:insert>
+			
+			<p:documentation>
+				<p:doc>Store a copy of the compiler code if a location to store it at has been supplied.</p:doc>
+			</p:documentation>
+			<p:store use-when="normalize-space($log-compiler) != ''" message="[debug] Saving compiler code to {$log-compiler}">
+				<p:with-option name="href" select="$log-compiler" />         
+			</p:store>
+			
+			
+			<p:xslt>
+				<p:with-input port="source" pipe="source@compile-xq"/>
+				<p:with-input port="stylesheet" pipe="@wrap-compiler" />
+				<p:with-option name="parameters" select="$compiler-options"/>
+			</p:xslt>
+			
+		</p:group>
+		
+		<p:documentation>
+			<p:doc>Store a copy of the compiled test file if a location to store it at has been supplied.</p:doc>
+		</p:documentation>
+		<p:store use-when="normalize-space($log-compiled) != ''" message="[debug] Saving compiled tests to {$log-compiled}">
+			<p:with-option name="href" select="$log-compiled" />         
+		</p:store>
+		
+	</p:declare-step>
 
-   <!--
-       Compile the suite on source into a stylesheet on result.
-   -->
-   <p:declare-step type="x:compile-xslt" name="compile-xsl">
-      <!-- the port declarations -->
-      <p:input  port="source" primary="true"/>
-      <p:output port="result" primary="true"/>
 
-      <p:option name="parameters" as="map(xs:QName,item()*)?"/>
-      
-      
-      <p:group>
-         <p:variable name="xspec-home" select="map:get($parameters, xs:QName('xspec-home'))"/>
-         <p:variable name="compiler-uri" select="map:get($parameters, xs:QName('compiler-uri'))"/>
+	<p:documentation>
+		<doc:p>Generate a formatted report from the XML test results.</doc:p>
+		<doc:p>By default, this step generates an HTML document.</doc:p>
+		<doc:p>If xspec-home is set, it is used to resolve the XSLT that formats the
+			report.  If not, its public URI is used, to be resolved through the
+			EXPath packaging system.  If the document element is not an XSpec
+			x:report, the error x:ERR001 is thrown.</doc:p>
+	</p:documentation>
+	<p:declare-step type="x:format-report" name="format" expand-text="true">
+		
+		<p:documentation>
+			<p:doc>The test results, as XML.</p:doc>
+		</p:documentation>
+		<p:input  port="source" primary="true"/>
+		
+		<p:documentation>
+			<p:doc>The test results.  By default, these will be formatted as HTML.</p:doc>
+		</p:documentation>
+		<p:output port="result" primary="true"/>
+		
+		<p:documentation>
+			<doc:p>A path to the XSLT stylesheet to use to format the test results (optional).</doc:p>
+		</p:documentation>
+		<p:option name="formatter-uri" as="xs:anyURI?" static="true" />
+		
+		<p:documentation>
+			<doc:p>Configuration options to pass through to the formatter stylesheet (optional).</doc:p>
+		</p:documentation>
+		<p:option name="formatter-options" select="map{}" as="map(xs:QName, item()*)?" static="true" />
+		
+		<p:documentation>
+			<doc:p>Serialization options for the formatted report (optional).</doc:p>
+		</p:documentation>
+		<p:option name="serialization-options" select="map{ 
+				xs:QName('indent') : true(), 
+				xs:QName('method') : 'xhtml', 
+				xs:QName('encoding') : 'UTF-8', 
+				xs:QName('include-content-type') : true(), 
+				xs:QName('omit-xml-declaration') : false()
+			}" as="map(xs:QName, item()*)?" static="true" />
+		
+		<p:documentation>
+			<doc:p>A path to the root of the XSpec project (optional).</doc:p>
+		</p:documentation>
+		<p:option name="xspec-home" as="xs:anyURI?" static="true" />
+		
+		<p:documentation>
+			<doc:p>If you want to store a copy of the formatted report, for example to aid with 
+				debugging, then you can use this option to specify where to save it (optional).  
+				If this option is empty then this step will NOT save a copy of the formatted report
+				to the file-system.</doc:p>
+			<doc:p>The formatted report will always be output via the result port.</doc:p>
+		</p:documentation>
+		<p:option name="log-report" as="xs:anyURI?" static="true" />
+	
+		<p:group>
+	
+			<p:documentation>
+				<doc:ol>
+					<doc:li>if formatter-uri is not passed, then use xspec-home to resolve the compiler</doc:li>
+					<doc:li>if xspec-home is not passed, then use the packaging public URI</doc:li>
+				</doc:ol>
+			</p:documentation>
+			<p:variable name="formatter"
+				select="if (normalize-space($formatter-uri) != '') then (
+					$formatter-uri
+				) else if (normalize-space($xspec-home) != '') then (
+					resolve-uri('src/reporter/format-xspec-report.xsl', $xspec-home)
+				) else (
+					'http://www.jenitennison.com/xslt/xspec/format-xspec-report.xsl'
+				)"
+			/>
+		
+			<p:choose>
+				
+				<p:documentation>
+					<doc:p>If the source document is the XML version of the XSpec test results, then format it.</doc:p>
+				</p:documentation>
+				<p:when test="exists(/x:report)">
+					
+					<x:indent name="indent" />
+					
+					<p:xslt name="format-report">
+						<p:with-input port="source" pipe="@indent"/>
+						<p:with-input port="stylesheet">
+							<p:document href="{$formatter}" pkg:kind="xslt" />
+						</p:with-input>
+						<p:with-option name="parameters" select="$formatter-options"/>
+					</p:xslt>
+					
+				</p:when>
+		
+				<p:documentation>
+					<doc:p>If the source document is NOT the XML version of the XSpec test results, then throw an error.</doc:p>
+				</p:documentation>
+				<p:otherwise>
+					<p:error code="x:ERR001">
+						<p:with-input port="source">
+							<p:inline>
+								<message>Not an x:report document</message>
+							</p:inline>
+						</p:with-input>
+					</p:error>
+				</p:otherwise>
+			</p:choose>
+			
+		</p:group>
+	
+		<p:if test="map:size($serialization-options) > 0">
+			<p:set-properties>
+				<p:with-option name="properties" select="map:put( map{}, 'serialization', $serialization-options)" as="map(xs:QName, item()*)?" />
+			</p:set-properties>
+		</p:if>
+	
+		<p:documentation>
+			<p:doc>Store a copy of the formatted test results if a location to store it at has been supplied.</p:doc>
+		</p:documentation>
+		<p:store use-when="normalize-space($log-report) != ''" message="[debug] Saving formatted report to {$log-report}">
+			<p:with-option name="href" select="$log-report" />         
+		</p:store>
+		
+	</p:declare-step>
 
-         <!-- if compiler-uri is not passed, then use xspec-home to resolve the compiler -->
-         <!-- if xspec-home is not passed, then use the packaging public URI -->
-         <p:variable name="compiler"
-            select="if ( $compiler-uri != '') then
-                  $compiler-uri
-               else if ( $xspec-home != '') then
-                  resolve-uri('src/compiler/compile-xslt-tests.xsl', $xspec-home)
-               else
-                  'http://www.jenitennison.com/xslt/xspec/compile-xslt-tests.xsl'"/>
 
-         <!-- load the compiler -->
-         <p:load name="compiler" pkg:kind="xslt">
-            <p:with-option name="href" select="$compiler"/>
-         </p:load>
 
-         <!-- actually compile the suite in a stylesheet -->
-         <p:xslt>
-            <p:with-input port="source" pipe="source@compile-xsl"/>
-            <p:with-input port="stylesheet" pipe="@compiler"/>
-            <p:with-option name="parameters" select="$parameters"/>
-         </p:xslt>
-      </p:group>
+	<p:documentation>
+		<doc:p>Escapes markup.</doc:p>
+		<doc:p>Also mimics @use-character-maps="x:disable-escaping" 
+			in ../compiler/xquery/main.xsl.</doc:p>
+	</p:documentation>
+	<p:declare-step type="x:escape-markup" name="escape-markup">
+	
+		<p:documentation>
+			<p:doc>Content to escape.</p:doc>
+		</p:documentation>
+		<p:input  port="source" primary="true"/>
+		
+		<p:documentation>
+			<p:doc>Escaped result, cast to text.</p:doc>
+		</p:documentation>
+		<p:output port="result" primary="true"/>
+		
+		<p:cast-content-type content-type="text/plain"/>
+		
+		<p:text-replace pattern="&#xE801;" replacement="&lt;"/>
+		<p:text-replace pattern="&#xE803;" replacement="&gt;"/>
+		
+	</p:declare-step>
 
-      <!-- log the result? -->
-      <x:log if-set="log-compilation">
-         <p:with-option name="parameters" select="$parameters"/>         
-      </x:log>
-   </p:declare-step>
+	<p:documentation>
+		<doc:p>Extract XQuery script as text from the XML document 
+			that is generated by the compile step. That generates 
+			the script inside a query XML element</doc:p>
+	</p:documentation>
+	<p:declare-step type="x:extract-xquery" name="extract-xquery">
+		
+		<p:documentation>
+			<p:doc>Content to escape.</p:doc>
+		</p:documentation>
+		<p:input  port="source" primary="true"/>
+		
+		<p:documentation>
+			<p:doc>Escaped result, cast to text.</p:doc>
+		</p:documentation>
+		<p:output port="result" primary="true"/>
+		
+		<x:escape-markup/>   
+		
+		<p:text-replace pattern="^&lt;query(.*)>" replacement=""/>
+		<p:text-replace pattern="&lt;/query>\s?$" replacement=""/>
+		
+	</p:declare-step>
 
-   <!--
-       Compile the suite on source into a query on result.
-       
-       Parameters to the XSpec XQuery compiler, AKA compile-xquery-tests.xsl, 
-       can be passed on the parameters option (e.g. utils-library-at to suppress 
-       the at location hint to use to import the XSpec utils library modules in the 
-       generated query).
-   -->
-   <p:declare-step type="x:compile-xquery" name="compile-xq">
-      <!-- the port declarations -->
-      <p:input  port="source" primary="true"/>
-      <p:output port="result" primary="true"/>
 
-      <p:option name="parameters" as="map(xs:QName,item()*)?"/>
-      
-      <p:group>
-        <!-- param: xspec-home: the dir with the sources of XSpec if EXPath packaging
-             is not supported -->
-         <p:variable name="xspec-home" select="map:get($parameters, xs:QName('xspec-home'))"/>
-         <p:variable name="compiler-uri" select="map:get($parameters, xs:QName('compiler-uri'))"/>
+	<p:documentation>
+		<doc:p>Serializes the source document with indentation.</doc:p>
+	</p:documentation>
+	<p:declare-step type="x:indent" name="indent">
+		
+		<p:documentation>
+			<p:doc>Content to indent.</p:doc>
+		</p:documentation>
+		<p:input  port="source" primary="true"/>
+		
+		<p:documentation>
+			<p:doc>Indented result (XML).</p:doc>
+		</p:documentation>
+		<p:output port="result" primary="true"/>
+		
+		<p:documentation>
+			<doc:p>If you want to store a copy of the compiled XSpec, for example to aid with 
+				debugging, then you can use this option to specify where to save it (optional).</doc:p>
+			<doc:p>If this option is empty then this step will NOT save a copy of the compiled 
+				XSpec result to the file-system.</doc:p>
+		</p:documentation>
+		<p:option name="log-indented" as="xs:anyURI?" static="true" />
+		
+		<p:documentation>
+			<p:doc>Serialize with indentation.</p:doc>
+		</p:documentation>
+		<p:cast-content-type content-type="text/plain" parameters="map{'indent':1}"/>
+		
+		<p:documentation>
+			<p:doc>Deserialize the string value.</p:doc>
+		</p:documentation>
+		<p:cast-content-type content-type="text/xml"/>
+		
+		<p:documentation>
+			<p:doc>Store a copy of the indented test results if a location to store it at has been supplied.</p:doc>
+		</p:documentation>
+		<p:store use-when="normalize-space($log-indented) != ''" message="[debug] Saving indented source to {$log-indented}">
+			<p:with-option name="href" select="$log-indented" />         
+		</p:store>
 
-         <!-- if compiler-uri is not passed, then use xspec-home to resolve the compiler -->
-         <!-- if xspec-home is not passed, then use the packaging public URI -->
-         <p:variable name="compiler"
-            select="if ( $compiler-uri ) then
-                  $compiler-uri
-               else if ( $xspec-home ) then
-                  resolve-uri('src/compiler/compile-xquery-tests.xsl', $xspec-home)
-               else
-                  'http://www.jenitennison.com/xslt/xspec/compile-xquery-tests.xsl'"/>
-
-         <!-- wrap the generated query in a c:query element -->
-         <p:string-replace match="/xsl:*/xsl:import/@href" name="compiler">
-            <p:with-option name="replace" select="'''' || $compiler || ''''"/>
-            <p:with-input port="source" expand-text="false">
-               <p:inline exclude-inline-prefixes="#all"><xsl:stylesheet
-                  exclude-result-prefixes="#all"
-                  version="3.0">
-   <xsl:import href="[to be replaced]" />
-   <xsl:template match="document-node()" as="element(Q{http://www.w3.org/ns/xproc-step}query)">
-      <query xmlns="http://www.w3.org/ns/xproc-step"><xsl:next-match /></query>
-   </xsl:template>
-</xsl:stylesheet></p:inline>
-            </p:with-input>
-         </p:string-replace>
-
-         <!-- log the temp compiler? -->
-         <x:log if-set="log-compiler">
-            <p:with-option name="parameters" select="$parameters"/>         
-         </x:log>
-
-         <!-- actually compile the suite in a query -->
-         <p:xslt name="do-it">
-            <p:with-input port="source" pipe="source@compile-xq"/>
-            <p:with-input port="stylesheet" pipe="@compiler"/>
-            <p:with-option name="parameters" select="$parameters"/>
-         </p:xslt>
-      </p:group>
-      
-      <!-- log the result? -->
-      <x:log if-set="log-compilation">
-         <p:with-option name="parameters" select="$parameters"/>         
-      </x:log>
-   </p:declare-step>
-
-   <!--
-       Get the XML report on source, and give the HTML report on result.
-       
-       If xspec-home is set, it is used to resolve the XSLT that formats the
-       report.  If not, its public URI is used, to be resolved through the
-       EXPath packaging system.  If the document element is not an XSpec
-       x:report, the error x:ERR001 is thrown.
-   -->
-   <p:declare-step type="x:format-report" name="format">
-      <!-- the port declarations -->
-      <p:input port="source" primary="true"/>
-      <p:output port="result" primary="true"/>
-
-      <p:option name="parameters" as="map(xs:QName,item()*)?"/>
-
-      <p:group>
-        <!-- option: xspec-home: the dir with the sources of XSpec if EXPath packaging
-             is not supported -->
-         <p:variable name="xspec-home" select="map:get($parameters, xs:QName('xspec-home'))"/>
-         
-         <p:variable name="formatter"
-            select="if ( $xspec-home ) then
-                  resolve-uri('src/reporter/format-xspec-report.xsl', $xspec-home)
-               else
-                  'http://www.jenitennison.com/xslt/xspec/format-xspec-report.xsl'"/>
-
-         <!-- log the report? -->
-         <x:log if-set="log-xml-report">
-            <p:with-option name="parameters" select="$parameters"/>         
-         </x:log>
-
-         <!-- if there is a report, format it, or it is an error -->
-         <p:choose>
-            <p:when test="exists(/x:report)">
-               <x:indent name="indent">
-                  <p:with-option name="parameters" select="$parameters"/>
-               </x:indent>
-               <p:load name="formatter" pkg:kind="xslt">
-                  <p:with-option name="href" select="$formatter"/>
-               </p:load>
-
-               <p:xslt name="format-report">
-                  <p:with-input port="source" pipe="@indent"/>
-                  <p:with-input port="stylesheet" pipe="@formatter"/>
-                  <p:with-option name="parameters" select="$parameters"/>
-               </p:xslt>
-            </p:when>
-
-            <p:otherwise>
-               <p:error code="x:ERR001">
-                  <p:with-input port="source">
-                     <p:inline>
-                        <message>Not an x:report document</message>
-                     </p:inline>
-                  </p:with-input>
-               </p:error>
-            </p:otherwise>
-         </p:choose>
-      </p:group>
-
-      <!-- log the report? -->
-      <x:log if-set="log-report">
-         <p:with-option name="parameters" select="$parameters"/>         
-      </x:log>
-   </p:declare-step>
-
-   <!-- Escapes markup. Also mimics @use-character-maps="x:disable-escaping" in
-      ../compiler/xquery/main.xsl. -->
-   <p:declare-step type="x:escape-markup" name="escape-markup">
-      <p:input  port="source" primary="true"/>
-      <p:output port="result" primary="true"/>
-
-      <p:cast-content-type content-type="text/plain"/>
-      <p:text-replace pattern="&#xE801;" replacement="&lt;"/>
-      <p:text-replace pattern="&#xE803;" replacement="&gt;"/>
-   </p:declare-step>
-
-   <!-- Extract XQuery script as text from the XML document that is generated by the compile step. 
-      That generates the script inside a query XML element -->
-   <p:declare-step type="x:extract-xquery" name="extract-xquery">
-      <p:input  port="source" primary="true"/>
-      <p:output port="result" primary="true"/>
-
-      <x:escape-markup/>   
-      <p:text-replace pattern="^&lt;query(.*)>" replacement=""/>
-      <p:text-replace pattern="&lt;/query>\s?$" replacement=""/>
-   </p:declare-step>
-
-   <!-- Serializes the source document with indentation and reloads it -->
-   <p:declare-step type="x:indent" name="indent">
-      <p:input port="source" primary="true" />
-      <p:output port="result" primary="true" />
-
-      <p:option name="parameters" as="map(xs:QName,item()*)?"/>
-
-      <!-- Serialize with indentation. -->
-      <p:cast-content-type content-type="text/plain" parameters="map{'indent':1}"/>
-      
-      <!-- Deserialize the string value. -->
-      <p:cast-content-type content-type="text/xml"/>
-
-      <!-- Log? -->
-      <x:log if-set="log-indent">
-         <p:with-option name="parameters" select="$parameters"/>         
-      </x:log>
-   </p:declare-step>
+	</p:declare-step>
 
 </p:library>
 
