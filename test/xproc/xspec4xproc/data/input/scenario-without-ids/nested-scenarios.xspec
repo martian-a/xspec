@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:scenario label="a single input" xmlns:x="http://www.jenitennison.com/xproc/xspec">
+	
+	<x:context>
+		<x:port name="source"><example version="1.0"><p>Hello World!</p></example></x:port>			
+	</x:context>
+	
+	<x:expect port="result" label="Exact copy"><example version="1.0"><p>Hello World!</p></example></x:expect>
+	
+	<x:scenario label="plus another input">
+		
+		<x:context>
+			<x:port name="source"><example version="1.0"><p>Hello World!</p></example></x:port>
+			<x:port name="source-2"><example version="1.0"><p>How ya been?</p></example></x:port>				
+		</x:context>
+		
+		<x:expect port="result" label="the two inputs have been merged"><example version="1.0"><p>Hello World! How ya been?</p></example></x:expect>
+		
+	</x:scenario>
+	
+</x:scenario>
+	

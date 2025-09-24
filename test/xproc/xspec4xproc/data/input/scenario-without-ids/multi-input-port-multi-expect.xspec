@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:scenario label="A simple XML sample" xmlns:x="http://www.jenitennison.com/xproc/xspec">
+	
+	<x:context>
+		<x:port name="source"><example version="1.0"><p>Well, hello world.</p></example></x:port>
+		<x:port name="source-2"><example version="1.0"><p>How ya been?</p></example></x:port>
+		<x:port name="source-3"><example version="1.0"><p>Good to see you, my old friend.</p></example></x:port>
+	</x:context>
+	
+	<x:expect port="result" label="version is 1.0" test="example/@version = '1.0'" />
+	<x:expect port="result" label="has just one paragraph" test="count(example/p) = 1" />
+	<x:expect port="result" label="is all three sources merged." test="example/p = 'Well, hello world. How ya been? Good to see you, my old friend.'" />
+	
+</x:scenario>
+	

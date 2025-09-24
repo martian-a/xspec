@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:description 
+	xmlns:x="http://www.jenitennison.com/xslt/xspec" 
+	xmlns:xpc="http://www.jenitennison.com/xproc/xspec"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	stylesheet="../../../../src/compiler/xproc/report.xsl"
+	xslt-version="3.0">
+	
+	<x:param name="xspec-uri" select="resolve-uri('../../data/input/identity-transform/identity_xproc.xspec')" />
+	<x:variable name="step-uri" select="resolve-uri('../../data/input/identity-transform/identity.xpl')" />	
+	
+	<x:scenario label="A matching scenario">
+		
+		<x:scenario label="with a single input port">
+		
+			<x:scenario label="and a single expectation">
+				
+				<x:scenario label="that's valid">
+				
+					<x:context href="../data/input/post-evaluate/simple-scenario.xml" />
+								
+					<x:expect label="the root element is *:report" test="/*/local-name() = 'report'" />
+					<x:expect label="the namespace uri for the root element is" test="/*/namespace-uri() = 'http://www.jenitennison.com/xproc/xspec'" />
+				
+				</x:scenario>
+				
+				<x:scenario label="that's invalid">
+					
+					<x:context href="../data/input/post-evaluate/simple-scenario_error.xml" />
+					
+					<x:expect label="the root element is *:report"><xpc:report>...</xpc:report></x:expect>					
+					
+				</x:scenario>
+				
+			</x:scenario>					
+			
+		</x:scenario>
+		
+	</x:scenario>
+	
+</x:description>

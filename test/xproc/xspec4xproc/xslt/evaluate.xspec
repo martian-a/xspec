@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:description 
+	xmlns:x="http://www.jenitennison.com/xslt/xspec" 
+	xmlns:xpc="http://www.jenitennison.com/xproc/xspec"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	stylesheet="../../../../src/compiler/xproc/evaluate.xsl"
+	xslt-version="3.0">
+	
+	<x:scenario label="A matching scenario">
+		
+		<x:scenario label="with a single input port">
+		
+			<x:scenario label="and a single expectation">
+				
+				<x:scenario label="that's valid">
+				
+					<x:context><xpc:scenario label="A simple XML sample" id="scenario1">
+							
+							<xpc:context>
+								<xpc:port name="source"><example version="1.0"><p>Hello World!</p></example></xpc:port>			
+							</xpc:context>
+							<xpc:results><xpc:port name="result"><example xmlns:xpc="http://xspec.io/ns/xproc" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0"><p>Hello World!</p></example></xpc:port></xpc:results>
+							
+							<xpc:expect port="result" label="Exact copy" id="expect1"><example version="1.0"><p>Hello World!</p></example></xpc:expect>
+							
+					</xpc:scenario></x:context>
+								
+					<x:expect label="the expect is marked as successful" test="xpc:scenario[@id = 'scenario1']/xpc:expect/@successful = 'true'" />					
+				
+				</x:scenario>
+				
+				<x:scenario label="that's invalid">
+					
+					<x:context><xpc:scenario label="A simple XML sample" id="scenario1">
+							
+							<xpc:context>
+								<xpc:port name="source"><example version="1.0"><p>Hello World!</p></example></xpc:port>			
+							</xpc:context>
+							<xpc:results><xpc:port name="result"><example xmlns:xpc="http://xspec.io/ns/xproc" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0"><p>Hello World!</p></example></xpc:port></xpc:results>
+							
+							<xpc:expect port="result" label="Exact copy" id="expect1"><example version="1.0"><p>Hello there!</p></example></xpc:expect>
+							
+					</xpc:scenario></x:context>
+					
+					<x:expect label="the expect is marked as successful" test="xpc:scenario[@id = 'scenario1']/xpc:expect/@successful = 'false'" />					
+					
+				</x:scenario>
+				
+			</x:scenario>					
+			
+		</x:scenario>
+		
+	</x:scenario>
+	
+</x:description>

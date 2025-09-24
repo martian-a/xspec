@@ -1,0 +1,128 @@
+# XSpec = XProc Specifications
+# This schema is for XSpec documents, which can be used to describe the behaviour
+# of an XProc application. They are similar to the RSpec documents used in RoR
+# testing, but for XProc
+default namespace x = "http://www.jenitennison.com/xproc/xspec"
+namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
+
+start = description
+
+description = 
+	## A description is a description of a stylesheet application. 
+	## It must have a stylesheet and/or a query it's associated with.
+	## It may also have a version to aid development over time.
+	element description { 
+		common-attributes,
+		attribute step { xsd:anyURI }?,
+
+		## XProc version which will be declared in the compiled main module.
+		[ a:defaultValue = "3.1" ]
+		attribute xproc-version { xsd:decimal }?,
+
+		attribute version { xsd:decimal }?,
+		attribute preserve-space { xsd:NMTOKENS }?,
+		
+		(scenario)+ }
+
+scenario = 
+	## A scenario defines the environment in which a piece of processing takes place.
+	##
+	## Any parameters defined within a scenario equate to global (stylesheet)
+	## parameters.
+	##
+	## If a scenario has a pending attribute, this has the same semantics as
+	## wrapping the scenario in a <pending> element with a label equal to the value
+	## of the pending attribute.
+	##
+	## If any scenario has a focus attribute, any scenarios without a focus 
+	## attribute will be classed as pending.
+	xproc-scenario-wrapper
+
+common-scenario-attributes = common-attributes
+
+label = 
+	## A scenario's label should describe the context that the scenario sets. Top-
+	## level scenarios' labels should be of the form "the square of a number" or 
+	## "the XHTML for a <P1> element". Nested scenario labels will usually start with 
+	## the word "with"; it should make sense if the labels of ancestor scenarios are 
+	## concatenated with this one. For example "with a Type attribute".
+	attribute label { text } |
+	element label { text }
+
+xproc-scenario-wrapper = (
+	element scenario { 
+		common-scenario-attributes*, 
+        label,
+        ( xproc-scenario-wrapper+ | xproc-scenario)
+    })      
+    
+xproc-scenario = (
+	xproc-context,
+	xproc-assertion+
+)
+
+xproc-context = 
+	## The <context> element defines a context item, the mode in which templates
+	## are applied to it, and any parameters included in the apply templates.
+	element context { 
+		common-attributes,
+		xproc-input-port*,
+		xproc-option*
+	}
+		
+xproc-input-port = element port {
+		name,
+		selection
+	}
+	
+xproc-output-port = attribute port { eqname.datatype }
+	
+xproc-option = element option { selection }
+
+name = attribute name { eqname.datatype }
+
+as = attribute as { text }
+
+selection = as?, (node-selection | value-selection)
+
+node-selection = (
+                 ## The document URI (location) of the selected document.
+                 attribute href { xsd:anyURI }
+                 | user-content
+                 ),
+                 ## The XPath expression to access the selected node. 
+                 attribute select { xpath }?
+
+value-selection =
+    ## The XPath expression without definitive context.
+    attribute select { xpath }
+
+xpath = xsd:string { minLength = "1" }
+
+xproc-assertion = 
+	## An assertion's test XPath can either return a boolean value, in which case the 
+	## assertion succeeds only if the test is true; or a sequence, in which case the
+	## assertion succeeds only if the sequence is equal to the one specified with the
+	## href and select attributes or content of the <expect> element.
+	element expect { common-attributes,
+		label, xproc-output-port?, test?, selection }
+
+test = attribute test { xpath }
+
+xml-ns-attributes = attribute xml:* { text }*
+common-attributes = xml-ns-attributes
+
+user-content = mixed { (user-element | text-element)* }
+user-element = element * - x:* { attribute * - x:expand-text { text }*, attribute x:expand-text { boolean.datatype }?, user-content }
+
+text-element =
+	## Works like <xsl:text>.
+	## Text in this element is not ignored even when it's whitespace-only.
+	element text { common-attributes, text }
+
+
+# Data types from https://www.w3.org/TR/xslt-30/schema-for-xslt30.rnc
+uri.qualified.name = xsd:token { pattern = "Q\{[^\{\}]*\}[\i-[:]][\c-[:]]*" } 
+qname.strict = xsd:token { pattern = "[\i-[:]][\c-[:]]:[\i-[:]][\c-[:]]" }
+eqname.datatype = xsd:QName | uri.qualified.name | qname.strict 
+boolean.datatype = "yes" | "no" | "true" | "false" | "0" | "1" 

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+	
+	<group id="grammmars">
+		
+		<uri name="http://www.jenitennison.com/xslt/xspec"
+			uri="src/schemas/xspec.rnc" />
+		
+		<uri name="http://www.jenitennison.com/xproc/xspec"
+			uri="src/schemas/xspec4xproc.rnc" />
+		
+	</group>
+	
+</catalog>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:description 
+	xmlns:p="http://www.w3.org/ns/xproc"   
+	xmlns:px="http://xspec.io/ns/xproc"
+	xmlns:x="http://www.jenitennison.com/xslt/xspec" 
+	xmlns:xpc="http://www.jenitennison.com/xproc/xspec"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	stylesheet="../../../../src/compiler/xproc/generate-dynamic-step.xsl"
+	xslt-version="3.0">
+	
+	<x:param name="xspec-uri" select="resolve-uri('../../data/input/identity-transform/identity_xproc.xspec')" />
+	<x:variable name="step-uri" select="resolve-uri('../../data/input/identity-transform/identity.xpl')" />
+	
+	<x:scenario label="Identity transform">
+		
+		<x:context><xpc:scenario label="A simple XML sample" id="scenario1">
+				
+				<xpc:context>
+					<xpc:port name="source"><example version="1.0"><p>Hello World!</p></example></xpc:port>			
+				</xpc:context>
+				
+				<xpc:expect id="expect1" port="result" label="Exact copy"><example version="1.0"><p>Hello World!</p></example></xpc:expect>
+				
+		</xpc:scenario></x:context>
+		
+		<x:expect label="root element is declare-step"><p:declare-step type="xpc:dynamic-step" name="dynamic-step" version="3.1">...</p:declare-step></x:expect>
+		<x:expect label="the step under test is imported" test="/p:declare-step/p:import/@href = $step-uri" />
+		<x:expect label="there is just one output port" test="count(/p:declare-step/p:output) = 1" />
+		<x:expect label="the output port is called result" test="/p:declare-step/p:output/@port = 'result'" />
+		<x:expect label="the output port accepts a sequence" test="/p:declare-step/p:output/@sequence = 'true'" />
+		<x:expect label="the first step is an identity transform" test="/p:declare-step/*[not(local-name() = ('import', 'output'))][1]"><identity xmlns="http://xspec.io/ns/xproc" name="step-under-test">
+				<p:with-input port="source">
+					<p:inline>
+						<example xmlns="" version="1.0">
+							<p>Hello World!</p>
+						</example>
+					</p:inline>
+				</p:with-input>
+		</identity></x:expect>
+		<x:expect label="the second step is a sink" test="/p:declare-step/*[not(local-name() = ('import', 'output'))][2]"><p:sink /></x:expect>
+		<x:expect label="the third step is a group" test="/p:declare-step/*[not(local-name() = ('import', 'output'))][3]"><p:group name="port-outputs">
+				<p:output port="result" sequence="true">
+					<p:pipe step="scenario1-result-port" port="result" />
+				</p:output>
+				<p:wrap-sequence wrapper="x:port">
+					<p:with-input port="source" pipe="result@step-under-test" />
+				</p:wrap-sequence>
+				<p:add-attribute name="scenario1-result-port" attribute-name="name" attribute-value="result" />
+				<p:sink />
+		</p:group></x:expect>
+		<x:expect label="the fourth step wraps the output in x:results" test="/p:declare-step/*[not(local-name() = ('import', 'output'))][4]"><p:wrap-sequence wrapper="x:results" /></x:expect>
+		<x:expect label="there are only four steps" test="count(/p:declare-step/*[not(local-name() = ('import', 'output'))]) = 4" />		
+	</x:scenario>
+	
+</x:description>

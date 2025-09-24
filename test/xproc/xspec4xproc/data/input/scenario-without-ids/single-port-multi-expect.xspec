@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:scenario label="A simple XML sample" xmlns:x="http://www.jenitennison.com/xproc/xspec">
+	
+	<x:context>
+		<x:port name="source"><example version="1.0"><p>Hello World!</p></example></x:port>			
+	</x:context>
+	
+	<x:expect port="result" label="version is 1.0" test="example/@version = '1.0'" />
+	<x:expect port="result" label="has just one paragraph" test="count(example/p) = 1" />
+	<x:expect port="result" label="says Hello World!" test="example/p = 'Hello World!'" />
+	
+</x:scenario>
+	

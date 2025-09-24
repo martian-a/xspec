@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:description 
+	xmlns:x="http://www.jenitennison.com/xslt/xspec" 
+	xmlns:xpc="http://www.jenitennison.com/xproc/xspec"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	stylesheet="../../../../src/compiler/xproc/assign-ids.xsl"
+	xslt-version="3.0">
+	
+	<x:scenario label="A single scenario">
+		
+		<x:scenario label="with a single input port">
+		
+			<x:scenario label="and a single expectation">
+				
+				<x:context href="../data/input/scenario-without-ids/simple-scenario.xspec" />
+							
+				<x:expect label="the scenario ID is scenario1" test="xpc:scenario/@id = 'scenario1'" />
+				<x:expect label="there is still only one context" test="count(xpc:scenario/xpc:context) = 1" />
+				<x:expect label="there is still only one port" test="count(xpc:scenario/xpc:context/xpc:port) = 1" />
+				<x:expect label="there is still only one expectation" test="count(xpc:scenario/xpc:expect) = 1" />
+				<x:expect label="the expect ID is expect1" test="xpc:scenario/xpc:expect/@id = 'expect1'" />			
+				
+			</x:scenario>
+			
+			<x:scenario label="but multiple expectations">
+				
+				<x:context href="../data/input/scenario-without-ids/single-port-multi-expect.xspec" />
+				
+				<x:expect label="the scenario ID is scenario1" test="xpc:scenario/@id = 'scenario1'" />
+				<x:expect label="there is still only one context" test="count(xpc:scenario/xpc:context) = 1" />
+				<x:expect label="there is still only one port" test="count(xpc:scenario/xpc:context/xpc:port) = 1" />
+				<x:expect label="there are still three expectations" test="count(xpc:scenario/xpc:expect) = 3" />
+				<x:expect label="all three expectations still test the result output port" test="xpc:scenario/xpc:expect/@port = 'result'" />
+				<x:expect label="the ID for the first expectation is expect1" test="xpc:scenario/xpc:expect[1]/@id = 'expect1'" />
+				<x:expect label="the ID for the second expectation is expect2" test="xpc:scenario/xpc:expect[2]/@id = 'expect2'" />
+				<x:expect label="the ID for the third expectation is expect3" test="xpc:scenario/xpc:expect[3]/@id = 'expect3'" />			
+				
+			</x:scenario>
+			
+		</x:scenario>
+		
+		<x:scenario label="with multiple input ports">
+			
+			<x:scenario label="and multiple expectations">
+				
+				<x:context href="../data/input/scenario-without-ids/multi-input-port-multi-expect.xspec" />
+				
+				<x:expect label="the scenario ID is scenario1" test="xpc:scenario/@id = 'scenario1'" />
+				<x:expect label="there is still only one context" test="count(xpc:scenario/xpc:context) = 1" />
+				<x:expect label="there are still three input ports" test="count(xpc:scenario/xpc:context/xpc:port) = 3" />
+				<x:expect label="there are still three expectations" test="count(xpc:scenario/xpc:expect) = 3" />
+				<x:expect label="all three expectations still test the result output port" test="xpc:scenario/xpc:expect/@port = 'result'" />
+				<x:expect label="the ID for the first expectation is expect1" test="xpc:scenario/xpc:expect[1]/@id = 'expect1'" />
+				<x:expect label="the ID for the second expectation is expect2" test="xpc:scenario/xpc:expect[2]/@id = 'expect2'" />
+				<x:expect label="the ID for the third expectation is expect3" test="xpc:scenario/xpc:expect[3]/@id = 'expect3'" />			
+				
+			</x:scenario>
+			
+			<x:scenario label="and multiple output ports">
+				
+				<x:context href="../data/input/scenario-without-ids/multi-input-port-multi-output-port-multi-expect.xspec" />
+				
+				<x:expect label="the scenario ID is scenario1" test="xpc:scenario/@id = 'scenario1'" />
+				<x:expect label="there is still only one context" test="count(xpc:scenario/xpc:context) = 1" />
+				<x:expect label="there are still three input ports" test="count(xpc:scenario/xpc:context/xpc:port) = 3" />
+				<x:expect label="there are still six expectations" test="count(xpc:scenario/xpc:expect) = 6" />
+				<x:expect label="three expectations still test the result output port" test="xpc:scenario/xpc:expect[position() = (2, 3, 6)]/@port = 'result'" />
+				<x:expect label="three expectations still test the result-2 output port" test="xpc:scenario/xpc:expect[position() = (1, 4, 5)]/@port = 'result-2'" />
+				<x:expect label="the ID for the first expectation is expect1" test="xpc:scenario/xpc:expect[1]/@id = 'expect1'" />
+				<x:expect label="the ID for the second expectation is expect2" test="xpc:scenario/xpc:expect[2]/@id = 'expect2'" />
+				<x:expect label="the ID for the third expectation is expect3" test="xpc:scenario/xpc:expect[3]/@id = 'expect3'" />
+				<x:expect label="the ID for the fourth expectation is expect4" test="xpc:scenario/xpc:expect[4]/@id = 'expect4'" />	
+				<x:expect label="the ID for the fifth expectation is expect5" test="xpc:scenario/xpc:expect[5]/@id = 'expect5'" />	
+				<x:expect label="the ID for the sixth expectation is expect6" test="xpc:scenario/xpc:expect[6]/@id = 'expect6'" />	
+				
+			</x:scenario>
+			
+		</x:scenario>
+				
+	</x:scenario>
+	
+	<x:scenario label="nested scenarios">
+		
+		<x:context href="../data/input/scenario-without-ids/nested-scenarios.xspec" />
+		
+		<x:expect label="the ID on the outermost scenario is scenario1" test="xpc:scenario/@id = 'scenario1'" />
+		<x:expect label="the ID on the innermost scenario is scenario2" test="xpc:scenario/xpc:scenario/@id = 'scenario2'" />
+		<x:expect label="the ID for the first expectation is expect1" test="xpc:scenario/xpc:expect/@id = 'expect1'" />
+		<x:expect label="the ID for the second expectation is expect2" test="xpc:scenario/xpc:scenario/xpc:expect/@id = 'expect2'" />
+		
+	</x:scenario>
+	
+	
+
+	
+</x:description>
